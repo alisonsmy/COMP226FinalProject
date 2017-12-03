@@ -24,8 +24,8 @@ public class CharacterScript : MonoBehaviour {
 			GetComponent<Animation>().Play("Male2_B1_StandToWalk");
 		} */
 
-		/*if (transform.position.z == oldPosition) {
+		if (transform.position.z == oldPosition) {
 			GetComponent<Animation> ().Play ("Male2_A7_Crouch");
-		}*/
+		}
 	}
 }
