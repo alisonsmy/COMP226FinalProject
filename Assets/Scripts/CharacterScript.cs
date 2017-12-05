@@ -2,30 +2,77 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterScript : MonoBehaviour {
+public class CharacterScript : MonoBehaviour 
+{
+	bool sprint, grounded;
+	public Animator animator;
+	float wantedYRotation;
+	public float RotaionAmount = 5.0f;
+	public float rotationSensitivity = 60.0f;
 
-	public Vector3 pos1, pos2;
-	public float speed;
-	public float oldPosition = 0.0f;
 
 	// Use this for initialization
-	void Start () {
-		oldPosition = transform.position.z; //we want to keep track of how far char goes on the z axis, since that's the direction it is walking
+	void Start () 
+	{
+		//animator = GameObject.GetComponent<Animator> ();
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		/*if (Time.fixedTime == 2)
-		{
-			GetComponent<Animation>().Play("Male2_A7_Crouch");
-		}
-		if (Time.fixedTime == 4)
-		{
-			GetComponent<Animation>().Play("Male2_B1_StandToWalk");
-		} */
+	void Update () 
+	{
+		Sprint ();
+		Walk ();
+		Rotation ();
 
-		if (transform.position.z == oldPosition) {
-			GetComponent<Animation> ().Play ("Male2_A7_Crouch");
+		if (Input.GetKeyDown (KeyCode.Space)) 
+		{
+			StartCoroutine ("BasicJump");
+		}
+	
+	}
+
+	IEnumerator BasicJump()
+	{
+		animator.SetBool ("jump", true);
+		yield return new WaitForEndOfFrame();
+		animator.SetBool("jump",false);
+		StopCoroutine ("BasicJump");
+	}
+
+	void Walk()
+	{
+		animator.SetFloat ("walkForwardValue", Input.GetAxis ("Vertical")); //WS/UPDOWN
+		//animator.SetFloat("sideWalkValue",  Input.GetAxis("Horizontal"));//AD/LEFTRIGHT
+		animator.SetBool("sprint", sprint); //shift
+		//Debug.Log(animator.GetFloat("walkForwardValue"));
+	}
+
+	void Sprint()
+	{
+		if (Input.GetKeyDown (KeyCode.LeftShift))
+			sprint = true;
+		if (Input.GetKeyUp (KeyCode.LeftShift))
+			sprint = false;
+	}
+
+	void Rotation()
+	{
+		wantedYRotation += Input.GetAxis ("Mouse X") * Time.deltaTime * rotationSensitivity;
+		transform.rotation = Quaternion.Euler (new Vector3 (0, wantedYRotation, 0));
+	}
+
+	void OnCollisionStay(Collision other)
+	{
+		foreach (ContactPoint contact in other.contacts) 
+		{
+			if(Vector3.Angle(contact.normal, Vector3.up) < 60.0f)
+				grounded = true;
 		}
 	}
+	
+	void OnCollisionExit()
+	{
+		grounded = false;
+	}
+		
 }
