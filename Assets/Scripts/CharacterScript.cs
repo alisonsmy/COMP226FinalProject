@@ -9,12 +9,15 @@ public class CharacterScript : MonoBehaviour
 	float wantedYRotation;
 	public float RotaionAmount = 5.0f;
 	public float rotationSensitivity = 60.0f;
+	Rigidbody charRigBody;
+	public GameObject charObj;
 
 
 	// Use this for initialization
 	void Start () 
 	{
 		//animator = GameObject.GetComponent<Animator> ();
+		charRigBody = charObj.GetComponent<Rigidbody>();
 	}
 	
 	// Update is called once per frame
@@ -24,10 +27,10 @@ public class CharacterScript : MonoBehaviour
 		Walk ();
 		Rotation ();
 
-		if (Input.GetKeyDown (KeyCode.Space)) 
+		/*if (Input.GetKeyDown (KeyCode.Space)) 
 		{
 			StartCoroutine ("BasicJump");
-		}
+		}*/
 	
 	}
 
@@ -39,9 +42,26 @@ public class CharacterScript : MonoBehaviour
 		StopCoroutine ("BasicJump");
 	}
 
+	IEnumerator SideStepRight()
+	{
+		animator.SetBool ("sideStepRight", true);
+		yield return new WaitForEndOfFrame();
+		animator.SetBool("sideStepRight",false);
+		StopCoroutine ("SideStepRight");
+	}
+	IEnumerator Roll()
+	{
+		charRigBody.freezeRotation = true;
+		animator.SetBool ("roll", true);
+		yield return new WaitForEndOfFrame();
+		animator.SetBool("roll",false);
+		StopCoroutine ("Roll");
+		charRigBody.freezeRotation = false;
+	}
+
 	void Walk()
 	{
-		animator.SetFloat ("walkForwardValue", Input.GetAxis ("Vertical")); //WS/UPDOWN
+		animator.SetFloat ("walkForwardValue", 1); //WS/UPDOWN
 		//animator.SetFloat("sideWalkValue",  Input.GetAxis("Horizontal"));//AD/LEFTRIGHT
 		animator.SetBool("sprint", sprint); //shift
 		//Debug.Log(animator.GetFloat("walkForwardValue"));
@@ -73,6 +93,34 @@ public class CharacterScript : MonoBehaviour
 	void OnCollisionExit()
 	{
 		grounded = false;
+	}
+
+	void OnTriggerEnter(Collider other)
+	{
+		Debug.Log ("Triggered Action");
+		if(other.tag == "JumpingWall")
+		{
+			Debug.Log ("Triggered Action - JumpWall");
+			StartCoroutine ("BasicJump");
+		}
+
+		if(other.tag == "RightSideStep")
+		{
+			Debug.Log ("Triggered Action - RightSideStep");
+			StartCoroutine ("SideStepRight");
+		}
+
+		if(other.tag == "UnderPass")
+		{
+			Debug.Log ("Triggered Action - Roll");
+			StartCoroutine ("Roll");
+		}
+
+	}
+
+	void OnTriggerExit(Collider other)
+	{
+		Debug.Log ("Has left trigger.");
 	}
 		
 }
